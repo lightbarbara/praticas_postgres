@@ -29,4 +29,11 @@ ON
 JOIN
     roles
 ON
-    roles.id = jobs."roleId";
+    roles.id = jobs."roleId"
+WHERE
+    company.id = 10
+AND
+    roles.name = 'Software Engineer'
+AND
+    jobs.active = true
+;
