@@ -6,11 +6,13 @@ CREATE TABLE customers (
     password TEXT NOT NULL
 );
 
+CREATE TYPE "phoneType" AS ENUM ('landline', 'mobile')
+
 CREATE TABLE "customerPhones" (
     id SERIAL PRIMARY KEY,
     "customerId" INTEGER NOT NULL REFERENCES "customers"("id"),
     number TEXT NOT NULL,
-    type TEXT NOT NULL ENUM ('landline', 'mobile')
+    type "phoneType" NOT NULL
 );
 
 CREATE TABLE states (
@@ -26,29 +28,31 @@ CREATE TABLE cities (
 
 CREATE TABLE "customerAddresses" (
     id SERIAL PRIMARY KEY,
-    "customerId" INTEGER NOT NULL REFERENCES "customers"("id"),
+    "customerId" INTEGER NOT NULL UNIQUE REFERENCES "customers"("id"),
     street VARCHAR(30) NOT NULL,
     number INTEGER NOT NULL,
-    complement TEXT NOT NULL,
+    complement TEXT DEFAULT '-',
     "postalCode" TEXT NOT NULL,
     "cityId" INTEGER NOT NULL REFERENCES "cities"("id")
 );
 
 CREATE TABLE "bankAccount" (
     id SERIAL PRIMARY KEY,
-    "customerId" INTEGER NOT NULL REFERENCES "customers"("id"),
-    "accountNumber" TEXT NOT NULL,
+    "customerId" INTEGER NOT NULL UNIQUE REFERENCES "customers"("id"),
+    "accountNumber" TEXT NOT NULL UNIQUE,
     agency TEXT NOT NULL,
     "openDate" DATE NOT NULL DEFAULT NOW(),
-    "closeDate" DATE NOT NULL
+    "closeDate" DATE
 );
+
+CREATE TYPE "transactionType" AS ENUM ('deposit', 'withdraw')
 
 CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
     "bankAccountId" INTEGER NOT NULL REFERENCES "bankAccount"("id"),
-    amount INTEGER NOT NULL DEFAULT 0,
-    type TEXT NOT NULL ENUM ('deposit', 'withdraw'),
-    time DATE NOT NULL,
+    amount BIGINT NOT NULL,
+    type "transactionType" NOT NULL,
+    "time" TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
     description TEXT NOT NULL,
     cancelled BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -59,8 +63,8 @@ CREATE TABLE "creditCards" (
     name VARCHAR(30) NOT NULL,
     number TEXT NOT NULL,
     "securityCode" TEXT NOT NULL,
-    "expirationMonth" TEXT NOT NULL,
-    "expirationYear" TEXT NOT NULL,
+    "expirationMonth" INTEGER NOT NULL,
+    "expirationYear" INTEGER NOT NULL,
     password TEXT NOT NULL,
-    "cardLimit" INTEGER NOT NULL DEFAULT 0
+    "limit" INTEGER NOT NULL DEFAULT 0
 );
